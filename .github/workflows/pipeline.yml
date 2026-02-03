@@ -1,123 +1,87 @@
 name: POC18 CI Workflow
+
 on:
-    push:
-        branches:
-            - dev
-            - test
-            - main
+  push:
+    branches:
+      - dev
+      - test
+      - main
 
 jobs:
-   deploy-dev:
-        name: Deploy to dev
-        runs-on: ubuntu-latest
-        if: github.ref == 'refs/heads/dev'
-        environment: dev
+  deploy-dev:
+    name: Deploy to Dev
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'
+    environment: dev
 
-        steps:
-          - name: Deploy to dev EC2 via SSH
-            uses: appleboy/ssh-action@v1.0.3
-            with:
-                host: ${{ secrets.EC2_HOST }}
-                username: ${{ secrets.EC2_USER }}
-                key: ${{ secrets.EC2_KEY }}
-                port: 22
-                script: |
-                    echo "Connected to EC2"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-                    echo "cd to poc18 app directory"
-                    cd /home/${{ secrets.EC2_USER }}/poc-18-multi-env-pipeline
-                    cd poc18-aws
+      - name: Deploy to dev EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEV_EC2_HOST }}
+          username: ${{ secrets.DEV_EC2_USER }}
+          key: ${{ secrets.DEV_EC2_KEY }}
+          port: 22
+          script: |
+            echo "Connected to DEV EC2"
+            cd /home/${{ secrets.DEV_EC2_USER }}/poc-18-multi-env-pipeline/poc18-aws
+            git checkout dev
+            git pull origin dev
+            sudo cp index.html /usr/share/httpd/noindex/index.html
+            sudo systemctl restart httpd
+            echo "DEV deployment successful"
 
-                    echo "Checkout to dev branch"
-                    git checkout dev
+  deploy-test:
+    name: Deploy to Test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/test'
+    environment: test
 
-                    echo "Pull latest code from remote dev"
-                    git pull origin dev
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-                    echo "Copying contents of index html to httpd"
-                    sudo cp index.html /usr/share/httpd/noindex/index.html
+      - name: Deploy to test EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.TEST_EC2_HOST }}
+          username: ${{ secrets.TEST_EC2_USER }}
+          key: ${{ secrets.TEST_EC2_KEY }}
+          port: 22
+          script: |
+            echo "Connected to TEST EC2"
+            cd /home/${{ secrets.TEST_EC2_USER }}/poc-18-multi-env-pipeline/poc18-aws
+            git checkout test
+            git pull origin test
+            sudo cp index.html /usr/share/httpd/noindex/index.html
+            sudo systemctl restart httpd
+            echo "TEST deployment successful"
 
-                    echo "Restarting httpd"
-                    sudo systemctl restart httpd
+  deploy-prod:
+    name: Deploy to Prod
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: prod
 
-                    # echo "Adding PORT and NODE_ENV to env"
-                    # export PORT=8080
-                    # export NODE_ENV=dev
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-                    echo "Deployment to dev server successful!!"
-   deploy-test:
-        name: Deploy to test
-        runs-on: ubuntu-latest
-        if: github.ref == 'refs/heads/test'
-        environment: test
-
-        steps:
-          - name: Deploy to test EC2 via SSH
-            uses: appleboy/ssh-action@v1.0.3
-            with:
-                host: ${{ secrets.EC2_HOST }}
-                username: ${{ secrets.EC2_USER }}
-                key: ${{ secrets.EC2_KEY }}
-                port: 22
-                script: |
-                    echo "Connected to EC2"
-
-                    echo "cd to poc18 app directory"
-                    cd /home/${{ secrets.EC2_USER }}/poc-18-multi-env-pipeline
-                    cd poc18-aws
-
-                    echo "Checkout to test branch"
-                    git checkout test
-
-                    echo "Pull latest code from remote test"
-                    git pull origin test
-
-                    echo "Copying contents of index html to httpd"
-                    sudo cp index.html /usr/share/httpd/noindex/index.html
-
-                    echo "Restarting httpd"
-                    sudo systemctl restart httpd
-
-                    # echo "Adding PORT and NODE_ENV to env"
-                    # export PORT=8080
-                    # export NODE_ENV=dev
-
-                    echo "Deployment to test server successful!!"
-   deploy-prod:
-        name: Deploy to prod
-        runs-on: ubuntu-latest
-        if: github.ref == 'refs/heads/main'
-        environment: prod
-
-        steps:
-          - name: Deploy to prod EC2 via SSH
-            uses: appleboy/ssh-action@v1.0.3
-            with:
-                host: ${{ secrets.EC2_HOST }}
-                username: ${{ secrets.EC2_USER }}
-                key: ${{ secrets.EC2_KEY }}
-                port: 22
-                script: |
-                    echo "Connected to EC2"
-
-                    echo "cd to poc18 app directory"
-                    cd /home/${{ secrets.EC2_USER }}/poc-18-multi-env-pipeline
-                    cd poc18-aws
-
-                    echo "Checkout to main branch"
-                    git checkout main
-
-                    echo "Pull latest code from remote dev"
-                    git pull origin main
-
-                    echo "Copying contents of index html to httpd"
-                    sudo cp index.html /usr/share/httpd/noindex/index.html
-
-                    echo "Restarting httpd"
-                    sudo systemctl restart httpd
-
-                    # echo "Adding PORT and NODE_ENV to env"
-                    # export PORT=8080
-                    # export NODE_ENV=dev
-
-                    echo "Deployment to prod server successful!!"
+      - name: Deploy to prod EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_EC2_HOST }}
+          username: ${{ secrets.PROD_EC2_USER }}
+          key: ${{ secrets.PROD_EC2_KEY }}
+          port: 22
+          script: |
+            echo "Connected to PROD EC2"
+            cd /home/${{ secrets.PROD_EC2_USER }}/poc-18-multi-env-pipeline/poc18-aws
+            git checkout main
+            git pull origin main
+            sudo cp index.html /usr/share/httpd/noindex/index.html
+            sudo systemctl restart httpd
+            echo "PROD deployment successful"
