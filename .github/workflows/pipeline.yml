@@ -1,0 +1,51 @@
+name: POC-18 Multi-Environment Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  dev:
+    name: Deploy to Dev
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Dev
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+          chmod 600 key.pem
+          scp -o StrictHostKeyChecking=no -i key.pem index.html \
+          ${{ vars.EC2_USER }}@${{ vars.EC2_HOST }}:${{ vars.EC2_PATH }}/index.html
+
+  test:
+    name: Deploy to Test
+    needs: dev
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Test
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+          chmod 600 key.pem
+          scp -o StrictHostKeyChecking=no -i key.pem index.html \
+          ${{ vars.EC2_USER }}@${{ vars.EC2_HOST }}:${{ vars.EC2_PATH }}/index.html
+
+  prod:
+    name: Deploy to Prod
+    needs: test
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Prod
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+          chmod 600 key.pem
+          scp -o StrictHostKeyChecking=no -i key.pem index.html \
+          ${{ vars.EC2_USER }}@${{ vars.EC2_HOST }}:${{ vars.EC2_PATH }}/index.html
