@@ -15,9 +15,6 @@ jobs:
     environment: dev
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Deploy to dev EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -30,7 +27,7 @@ jobs:
             cd /home/${{ secrets.DEV_EC2_USER }}/poc-18-multi-env-pipeline/poc18-aws
             git checkout dev
             git pull origin dev
-            sudo cp /home/ec2-user/poc-18-multi/env/pipeline/index.html /var/www/html/index.html
+            sudo cp index.html /var/www/html/index.html
             sudo systemctl restart httpd
             echo "DEV deployment successful"
 
@@ -41,9 +38,6 @@ jobs:
     environment: test
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Deploy to test EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -56,7 +50,7 @@ jobs:
             cd /home/${{ secrets.TEST_EC2_USER }}/poc-18-multi-env-pipeline/poc18-aws
             git checkout test
             git pull origin test
-            sudo cp /home/ec2-user/poc-18-multi/env/pipeline/index.html /var/www/html/index.html
+            sudo cp index.html /var/www/html/index.html
             sudo systemctl restart httpd
             echo "TEST deployment successful"
 
@@ -67,9 +61,6 @@ jobs:
     environment: prod
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Deploy to prod EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -82,6 +73,6 @@ jobs:
             cd /home/${{ secrets.PROD_EC2_USER }}/poc-18-multi-env-pipeline/poc18-aws
             git checkout main
             git pull origin main
-            sudo cp /home/ec2-user/poc-18-multi/env/pipeline/index.html /var/www/html/index.html
+            sudo cp index.html /var/www/html/index.html
             sudo systemctl restart httpd
             echo "PROD deployment successful"
