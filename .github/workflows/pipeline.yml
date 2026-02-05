@@ -24,7 +24,8 @@ jobs:
             cd /home/ec2-user/poc-18-multi-env-pipeline
             git checkout dev
             git pull origin dev
-            sudo cp /home/ec2-user/poc-18-multi-env-pipeline/index.html /var/www/html/index.html
+            sudo cp -f /home/ec2-user/poc-18-multi-env-pipeline/index.html /var/www/html/index.html
+            sudo chmod 600 /var/www/html/index.html
             sudo systemctl restart httpd
 
   deploy-test:
@@ -43,7 +44,8 @@ jobs:
             cd /home/ec2-user/poc-18-multi-env-pipeline
             git checkout test
             git pull origin test
-            sudo cp /home/ec2-user/poc-18-multi-env-pipeline/index.html /var/www/html/index.html
+            sudo cp -f /home/ec2-user/poc-18-multi-env-pipeline/index.html /var/www/html/index.html
+            sudo chmod 600 /var/www/html/index.html
             sudo systemctl restart httpd
 
   deploy-prod:
@@ -62,5 +64,6 @@ jobs:
             cd /home/ec2-user/poc-18-multi-env-pipeline
             git checkout main
             git pull origin main
-            sudo cp /home/ec2-user/poc-18-multi-env-pipeline/index.html /var/www/html/index.html
+            sudo cp -f /home/ec2-user/poc-18-multi-env-pipeline/index.html /var/www/html/index.html
+            sudo chmod 600 /var/www/html/index.html
             sudo systemctl restart httpd
