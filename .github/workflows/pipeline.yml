@@ -11,61 +11,88 @@ jobs:
   deploy-dev:
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    environment: dev
 
-      - name: Deploy to DEV
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy index.html to DEV EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEV_EC2_HOST }}
+          username: ${{ secrets.DEV_EC2_USER }}
+          key: ${{ secrets.DEV_EC2_KEY }}
+          source: "index.html"
+          target: "/tmp"
+
+      - name: Deploy on DEV EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DEV_EC2_HOST }}
-          username: ec2-user
+          username: ${{ secrets.DEV_EC2_USER }}
           key: ${{ secrets.DEV_EC2_KEY }}
           script: |
-            cd /home/ec2-user/poc-18-multi-env-pipeline
-            git checkout dev
-            git pull origin dev
-            sudo cp -f /home/ec2-user/poc-18-multi-env-pipeline/index.html /var/www/html/index.html
-            sudo chmod 600 /var/www/html/index.html
+            sudo cp /tmp/index.html /var/www/html/index.html
             sudo systemctl restart httpd
-            sudo cat  /var/www/html/index.html
+            echo "DEV deployment successful"
+
 
   deploy-test:
     if: github.ref == 'refs/heads/test'
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    environment: test
 
-      - name: Deploy to TEST
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy index.html to TEST EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.TEST_EC2_HOST }}
+          username: ${{ secrets.TEST_EC2_USER }}
+          key: ${{ secrets.TEST_EC2_KEY }}
+          source: "index.html"
+          target: "/tmp"
+
+      - name: Deploy on TEST EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.TEST_EC2_HOST }}
-          username: ec2-user
+          username: ${{ secrets.TEST_EC2_USER }}
           key: ${{ secrets.TEST_EC2_KEY }}
           script: |
-            cd /home/ec2-user/poc-18-multi-env-pipeline
-            git checkout test
-            git pull origin test
-            sudo cp -f /home/ec2-user/poc-18-multi-env-pipeline/index.html /var/www/html/index.html
-            sudo chmod 600 /var/www/html/index.html
+            sudo cp /tmp/index.html /var/www/html/index.html
             sudo systemctl restart httpd
-            sudo cat  /var/www/html/index.html
+            echo "TEST deployment successful"
+
 
   deploy-prod:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    environment: prod
 
-      - name: Deploy to PROD
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy index.html to PROD EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_EC2_HOST }}
+          username: ${{ secrets.PROD_EC2_USER }}
+          key: ${{ secrets.PROD_EC2_KEY }}
+          source: "index.html"
+          target: "/tmp"
+
+      - name: Deploy on PROD EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.PROD_EC2_HOST }}
-          username: ec2-user
+          username: ${{ secrets.PROD_EC2_USER }}
           key: ${{ secrets.PROD_EC2_KEY }}
           script: |
-            cd /home/ec2-user/poc-18-multi-env-pipeline
-            
-            sudo cp -f /home/ec2-user/poc-18-multi-env-pipeline/index.html /var/www/html/index.html
-            sudo chmod 600 /var/www/html/index.html
+            sudo cp /tmp/index.html /var/www/html/index.html
             sudo systemctl restart httpd
-            sudo cat  /var/www/html/index.html
+            echo "PROD deployment successful"
