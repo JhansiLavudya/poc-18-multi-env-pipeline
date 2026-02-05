@@ -24,9 +24,10 @@ jobs:
             cd /home/ec2-user/poc-18-multi-env-pipeline
             git checkout dev
             git pull origin dev
-            sudo cp -f index.html /var/www/html/index.html
+            sudo cp -f /home/ec2-user/poc-18-multi-env-pipeline/index.html /var/www/html/index.html
             sudo chmod 600 /var/www/html/index.html
             sudo systemctl restart httpd
+            sudo cat  /var/www/html/index.html
 
   deploy-test:
     if: github.ref == 'refs/heads/test'
@@ -44,9 +45,10 @@ jobs:
             cd /home/ec2-user/poc-18-multi-env-pipeline
             git checkout test
             git pull origin test
-            sudo cp -f index.html /var/www/html/index.html
+            sudo cp -f /home/ec2-user/poc-18-multi-env-pipeline/index.html /var/www/html/index.html
             sudo chmod 600 /var/www/html/index.html
             sudo systemctl restart httpd
+            sudo cat  /var/www/html/index.html
 
   deploy-prod:
     if: github.ref == 'refs/heads/main'
@@ -62,8 +64,8 @@ jobs:
           key: ${{ secrets.PROD_EC2_KEY }}
           script: |
             cd /home/ec2-user/poc-18-multi-env-pipeline
-            git checkout main
-            git pull origin main
-            sudo cp -f index.html /var/www/html/index.html
+            
+            sudo cp -f /home/ec2-user/poc-18-multi-env-pipeline/index.html /var/www/html/index.html
             sudo chmod 600 /var/www/html/index.html
             sudo systemctl restart httpd
+            sudo cat  /var/www/html/index.html
